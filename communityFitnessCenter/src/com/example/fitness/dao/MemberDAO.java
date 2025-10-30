@@ -7,65 +7,54 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import com.example.fitness.model.MembershipPlan;
+import com.example.fitness.model.Member;
 
-public class MembershipPlanDAO {
-    
-    protected static EntityManagerFactory emf = 
+public class MemberDAO {
+
+    protected static EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("CommunityFitnessCenterPU");
 
-    public MembershipPlanDAO() {
-    }
-    
-    // Create / Persist
-    public void persist(MembershipPlan plan) {
+    public MemberDAO() { }
+
+    public void persist(Member member) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        em.persist(plan);
+        em.persist(member);
         em.getTransaction().commit();
         em.close();
     }
 
-    // Remove / Delete
-    public void remove(MembershipPlan plan) {
+    public Member merge(Member member) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        em.remove(em.merge(plan));  // merge ensures managed instance
+        Member updated = em.merge(member);
+        em.getTransaction().commit();
+        em.close();
+        return updated;
+    }
+
+    public void remove(Member member) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        em.remove(em.merge(member));
         em.getTransaction().commit();
         em.close();
     }
 
-    // Update / Merge
-    public MembershipPlan merge(MembershipPlan plan) {
+    public Member findById(int id) {
+        EntityManager em = emf.createEntityManager();
+        Member member = em.find(Member.class, id);
+        em.close();
+        return member;
+    }
+
+    public List<Member> getAllMembers() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        MembershipPlan updatedPlan = em.merge(plan);
+        List<Member> members = new ArrayList<Member>();
+        members = em.createQuery("SELECT m FROM Member m", Member.class).getResultList();
         em.getTransaction().commit();
         em.close();
-        return updatedPlan;
+        return members;
     }
-
-    
-
-    // Find by ID
-    public MembershipPlan findPlanById(int id) {
-        EntityManager em = emf.createEntityManager();
-        MembershipPlan plan = em.find(MembershipPlan.class, id);
-        em.close();
-        return plan;
-    }
-
-    // Read all
-    public List<MembershipPlan> getAllPlans() {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        List<MembershipPlan> plans = em.createQuery("SELECT p FROM MembershipPlan p", MembershipPlan.class)
-                                       .getResultList();
-        em.getTransaction().commit();
-        em.close();
-        return plans;
-    }
-    
 }
-
-	
