@@ -18,31 +18,6 @@ public class EmissionRecordDAO {
 		}
 	}
 
-	public EmissionRecord merge(EmissionRecord rec) {
-		EntityManager em = JPAUtil.getEntityManager();
-		try {
-			em.getTransaction().begin();
-			EmissionRecord updated = em.merge(rec);
-			em.getTransaction().commit();
-			return updated;
-		} finally {
-			em.close();
-		}
-	}
-
-	public void remove(int id) {
-		EntityManager em = JPAUtil.getEntityManager();
-		try {
-			em.getTransaction().begin();
-			EmissionRecord managed = em.find(EmissionRecord.class, id);
-			if (managed != null)
-				em.remove(managed);
-			em.getTransaction().commit();
-		} finally {
-			em.close();
-		}
-	}
-
 	public EmissionRecord findById(int id) {
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
@@ -55,7 +30,20 @@ public class EmissionRecordDAO {
 	public List<EmissionRecord> findAll() {
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
-			return em.createQuery("SELECT e FROM EmissionRecord e", EmissionRecord.class).getResultList();
+			return em.createQuery("SELECT e FROM EmissionRecord e ORDER BY e.year, e.category", EmissionRecord.class)
+					.getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
+	public EmissionRecord update(EmissionRecord rec) {
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			EmissionRecord merged = em.merge(rec);
+			em.getTransaction().commit();
+			return merged;
 		} finally {
 			em.close();
 		}

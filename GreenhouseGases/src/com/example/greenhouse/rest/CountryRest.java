@@ -1,112 +1,69 @@
 package com.example.greenhouse.rest;
 
+import com.example.greenhouse.dao.CountryDAO;
 import com.example.greenhouse.dao.JPAUtil;
 import com.example.greenhouse.model.Country;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+//REST resource for basic Country CRUD
 @Path("/countries")
-@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class CountryRest {
 
-	private EntityManager em() {
-		return JPAUtil.getEntityManager();
-	}
+	private final CountryDAO dao = new CountryDAO();
 
+	// GET all countries
 	@GET
 	public List<Country> getAll() {
-		EntityManager em = em();
-		try {
-			return em.createQuery("SELECT c FROM Country c", Country.class).getResultList();
-		} finally {
-			em.close();
-		}
+		return dao.findAll();
 	}
 
+	// GET one country by id
 	@GET
 	@Path("/{id}")
 	public Response getOne(@PathParam("id") int id) {
-		EntityManager em = em();
-		try {
-			Country c = em.find(Country.class, id);
-			if (c == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			return Response.ok(c).build();
-		} finally {
-			em.close();
-		}
+		Country c = dao.findById(id);
+		return (c == null) ? Response.status(Response.Status.NOT_FOUND).build() : Response.ok(c).build();
 	}
 
+	// CREATE a new country
 	@POST
 	public Response create(Country incoming) {
-		EntityManager em = em();
-		EntityTransaction tx = em.getTransaction();
-		try {
-			tx.begin();
-			em.persist(incoming);
-			tx.commit();
-
-			return Response.status(Response.Status.CREATED).entity(incoming).build();
-		} catch (Exception e) {
-			if (tx.isActive())
-				tx.rollback();
-			throw e;
-		} finally {
-			em.close();
-		}
+		dao.persist(incoming);
+		return Response.status(Response.Status.CREATED).entity(incoming).build();
 	}
 
+	// UPDATE an existing country
 	@PUT
 	@Path("/{id}")
 	public Response update(@PathParam("id") int id, Country incoming) {
-		EntityManager em = em();
-		EntityTransaction tx = em.getTransaction();
+		EntityManager em = JPAUtil.getEntityManager();
+
 		try {
-			tx.begin();
+			em.getTransaction().begin();
 			Country db = em.find(Country.class, id);
+
 			if (db == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			db.setIsoCode(incoming.getIsoCode());
 			db.setName(incoming.getName());
+			db.setIsoCode(incoming.getIsoCode());
 
-			Country merged = em.merge(db);
-			tx.commit();
-			return Response.ok(merged).build();
-		} catch (Exception e) {
-			if (tx.isActive())
-				tx.rollback();
-			throw e;
-		} finally {
-			em.close();
-		}
-	}
+			em.merge(db);
+			em.getTransaction().commit();
 
-	@DELETE
-	@Path("/{id}")
-	public Response delete(@PathParam("id") int id) {
-		EntityManager em = em();
-		EntityTransaction tx = em.getTransaction();
-		try {
-			tx.begin();
-			Country db = em.find(Country.class, id);
-			if (db == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			em.remove(db);
-			tx.commit();
-			return Response.noContent().build();
+			return Response.ok(db).build();
+
 		} catch (Exception e) {
-			if (tx.isActive())
-				tx.rollback();
+			if (em.getTransaction().isActive())
+				em.getTransaction().rollback();
 			throw e;
 		} finally {
 			em.close();

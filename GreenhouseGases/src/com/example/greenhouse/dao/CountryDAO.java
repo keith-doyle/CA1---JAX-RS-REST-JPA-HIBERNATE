@@ -30,7 +30,19 @@ public class CountryDAO {
 	public List<Country> findAll() {
 		EntityManager em = JPAUtil.getEntityManager();
 		try {
-			return em.createQuery("SELECT c FROM Country c", Country.class).getResultList();
+			return em.createQuery("SELECT c FROM Country c ORDER BY c.name", Country.class).getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
+	public Country findByName(String name) {
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			List<Country> list = em.createQuery("SELECT c FROM Country c WHERE c.name = :n", Country.class)
+					.setParameter("n", name).getResultList();
+
+			return list.isEmpty() ? null : list.get(0);
 		} finally {
 			em.close();
 		}

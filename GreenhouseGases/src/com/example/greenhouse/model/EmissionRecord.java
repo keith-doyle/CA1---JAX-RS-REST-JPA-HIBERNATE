@@ -9,46 +9,73 @@ public class EmissionRecord {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@ManyToOne
-	@JoinColumn(name = "country_id")
-	private Country country;
-
-	private String sector;
+	private String category;
+	private String description;
+	private String gasUnits;
+	private String scenario;
+	private double value;
 	private int year;
-	private double co2e;
+
+	private boolean approved;
+	private String approvedBy;
+
+	@ManyToOne
+	private Country country;
 
 	public EmissionRecord() {
 	}
 
-	public EmissionRecord(Country country, String sector, int year, double co2e) {
-		this.country = country;
-		this.sector = sector;
+	public EmissionRecord(String category, String gasUnits, double value, int year, String scenario) {
+		this.category = category;
+		this.gasUnits = gasUnits;
+		this.value = value;
 		this.year = year;
-		this.co2e = co2e;
+		this.scenario = scenario;
+		this.approved = false;
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public String getCategory() {
+		return category;
 	}
 
-	public Country getCountry() {
-		return country;
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
-	public void setCountry(Country country) {
-		this.country = country;
+	public String getDescription() {
+		return description;
 	}
 
-	public String getSector() {
-		return sector;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-	public void setSector(String sector) {
-		this.sector = sector;
+	public String getGasUnits() {
+		return gasUnits;
+	}
+
+	public void setGasUnits(String gasUnits) {
+		this.gasUnits = gasUnits;
+	}
+
+	public String getScenario() {
+		return scenario;
+	}
+
+	public void setScenario(String scenario) {
+		this.scenario = scenario;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
 	}
 
 	public int getYear() {
@@ -59,11 +86,27 @@ public class EmissionRecord {
 		this.year = year;
 	}
 
-	public double getCo2e() {
-		return co2e;
+	public boolean isApproved() {
+		return approved;
 	}
 
-	public void setCo2e(double co2e) {
-		this.co2e = co2e;
+	public void setApproved(boolean approved) {
+		this.approved = approved;
+	}
+
+	public String getApprovedBy() {
+		return approvedBy;
+	}
+
+	public void setApprovedBy(String approvedBy) {
+		this.approvedBy = approvedBy;
+	}
+
+	public Country getCountry() {
+		return country;
+	}
+
+	public void setCountry(Country country) {
+		this.country = country;
 	}
 }
